@@ -1,0 +1,52 @@
+{
+    "manifest_version": 2,
+    "name": "octotag-for-stars",
+    "description": "This extension provides you to attach tags for your starred repositories on GitHub.",
+    "version": "0.1.0",
+    "icons": {
+        "16": "images/icon/icon_16.png",
+        "48": "images/icon/icon_48.png",
+        "128": "images/icon/icon_128.png"
+    },
+    "background": {
+        "scripts": [
+            "js/background.js"
+        ],
+        "persistent": false
+    },
+    "browser_action": {
+        "default_icon": {
+            "19": "images/icon/icon_19.png",
+            "38": "images/icon/icon_38.png"
+        },
+        "default_title": "octotag-for-stars",
+        "default_popup": "popup.html"
+    },
+    "content_scripts": [
+        {
+            "matches": [
+                "https://github.com/",
+                "https://github.com/*",
+                "https://github.com/stars/",
+                "https://github.com/stars?*"
+            ],
+            "css": ["css/style.css"],
+            "js": [
+                "js/lib/jquery-3.3.1.min.js",
+                "js/constants.js",
+                "js/main.js"
+            ]
+        }
+    ],
+    "web_accessible_resources": [
+        "*.css",
+        "*.eot",
+        "*.svg",
+        "*.woff",
+        "*.woff2",
+        "*.ttf"
+    ],
+    "permissions": [
+        "storage"
+    ]
+}

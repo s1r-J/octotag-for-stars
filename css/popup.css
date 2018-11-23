@@ -1,0 +1,30 @@
+@charset "utf-8";
+
+body {
+    margin: 5px;
+    width: 180px;
+}
+
+ul {
+    list-style: none;
+    padding-left: 0;
+}
+
+li {
+    padding-left: 5px;
+    height: 1.2rem;
+}
+
+li:hover {
+    background-color: #9cdaf0;
+}
+
+a {
+    text-decoration: none;
+    color: #24292e;
+}
+
+.github-image {
+    width: 16px;
+    vertical-align: middle;
+}
