@@ -29,11 +29,23 @@ Install the extension from [Chrome Web Store](https://chrome.google.com/webstore
 
 ## Contribution
 
+Fork and Pull Request!
+
+I still happy that
+
 * Feedback
 * Bug reporing
 * Feature request
 
-and so on
+and so on.
+
+## TODO
+
+Fertures
+
+* Dump tags data in JSON.
+* Upload JSON to chrome storage.
+* Edit tags data in popup page(or other).
 
 ## Licence
 
