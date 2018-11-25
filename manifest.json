@@ -2,7 +2,7 @@
     "manifest_version": 2,
     "name": "octotag-for-stars",
     "description": "This extension provides you to attach tags for your starred repositories on GitHub.",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "icons": {
         "16": "images/icon/icon_16.png",
         "48": "images/icon/icon_48.png",
