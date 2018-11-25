@@ -7,26 +7,6 @@
  */
 $(function () {
 
-    let setupTestdata = function () {
-
-        let json = {
-            '/FortAwesome/Font-Awesome': ['tag1', 'tag2', 'tag3'],
-            '/google/gson': ['tag1', 'tag4']
-        };
-
-        chrome.storage.local.set({
-            octotagKey: JSON.stringify(json)
-        }, function () {
-            console.log('Value is set to ' + JSON.stringify(json));
-        });
-    };
-
-    let deleteTestDate = function () {
-        chrome.storage.local.remove(constants.storageKey, function (data) {
-            console.log('Successfully deleted', data);
-        });
-    };
-
     /**
      * Add hidden class to param not to display.
      * @param {jQuery object} $elem
@@ -173,61 +153,65 @@ $(function () {
 
     /**
      * Append tags to each repository.
+     * @return {Promise}
      */
-    const appendRepoTags = new Promise(function (resolve) {
+    const appendRepoTags = function () {
 
-        let $repolist = $(constants.selector.github_repo_ul);
-        let reponameArray = [];
-        $repolist.find(constants.selector.github_reponame_anchor).each(function () {
-            reponameArray.push($(this).attr('href'));
-        });
+        return new Promise(function (resolve) {
 
-        chrome.storage.local.get([constants.storageKey], function (result) {
+            let $repolist = $(constants.selector.github_repo_ul);
+            let reponameArray = [];
+            $repolist.find(constants.selector.github_reponame_anchor).each(function () {
+                reponameArray.push($(this).attr('href'));
+            });
 
-            let json = {};
-            if (result[constants.storageKey] !== void 0) {
-                json = JSON.parse(result[constants.storageKey]);
-            }
-            for (let reponame of reponameArray) {
+            chrome.storage.local.get([constants.storageKey], function (result) {
 
-                let $editHint = $('<span>', {
-                    class: constants.functional.edit_hint_class + ' ' + constants.functional.hidden_class,
-                    text: 'Edit tags using comma to separate tags, and press the enter-key to store tags.',
-                });
+                let json = {};
+                if (result[constants.storageKey] !== void 0) {
+                    json = JSON.parse(result[constants.storageKey]);
+                }
+                for (let reponame of reponameArray) {
 
-                let $editInput = $('<input>', {
-                    type: 'text',
-                    class: constants.functional.edit_input_class + ' ' + constants.functional.hidden_class,
-                    name: reponame,
-                });
+                    let $editHint = $('<span>', {
+                        class: constants.functional.edit_hint_class + ' ' + constants.functional.hidden_class,
+                        text: 'Edit tags using comma to separate tags, and press the enter-key to store tags.',
+                    });
 
-                let $editButton = createEditButton(reponame);
+                    let $editInput = $('<input>', {
+                        type: 'text',
+                        class: constants.functional.edit_input_class + ' ' + constants.functional.hidden_class,
+                        name: reponame,
+                    });
 
-                let $octotagList = $('<ul>', {
-                    class: constants.functional.taglist_ul_class,
-                });
-                let tagArray = json[reponame];
-                if (tagArray !== void 0) {
-                    for (let tag of tagArray) {
-                        $octotagList.append($('<li>', {
-                            text: tag,
-                        }));
+                    let $editButton = createEditButton(reponame);
+
+                    let $octotagList = $('<ul>', {
+                        class: constants.functional.taglist_ul_class,
+                    });
+                    let tagArray = json[reponame];
+                    if (tagArray !== void 0) {
+                        for (let tag of tagArray) {
+                            $octotagList.append($('<li>', {
+                                text: tag,
+                            }));
+                        }
+
+                        $editInput.val(tagArray.join(', '));
+                        $editInput.attr('data-before', tagArray.join(', '));
                     }
 
-                    $editInput.val(tagArray.join(', '));
-                    $editInput.attr('data-before', tagArray.join(', '));
+                    let $octotag = $('<div>', {
+                        class: constants.selector.repo_tag_class,
+                    }).append($editButton).append($editHint).append($editInput).append($octotagList);
+
+                    $('a[href="' + reponame + '"]', $repolist).parents('li').append($octotag);
                 }
 
-                let $octotag = $('<div>', {
-                    class: constants.selector.repo_tag_class,
-                }).append($editButton).append($editHint).append($editInput).append($octotagList);
-
-                $('a[href="' + reponame + '"]', $repolist).parents('li').append($octotag);
-            }
-
-            resolve();
+                resolve();
+            });
         });
-    });
+    };
 
     /**
      * Create edit button for param repository.
@@ -253,53 +237,57 @@ $(function () {
 
     /**
      * Append tags to filter area.
+     * @return {Promise}
      */
-    const appendTagFilter = new Promise(function (resolve) {
+    const appendTagFilter = function () {
 
-        let $filterDiv = $('<div>', {
-            id: constants.selector.filter_id,
-        });
+        return new Promise(function (resolve) {
 
-        chrome.storage.local.get([constants.storageKey], function (result) {
-            let tagSet = new Set();
-            let json = {};
-            if (result[constants.storageKey] !== void 0) {
-                json = JSON.parse(result[constants.storageKey]);
-            }
-            for (let k in json) {
-                let array = json[k];
-                for (let tag of array) {
-                    if (!tagSet.has(tag)) {
-                        tagSet.add(tag);
+            let $filterDiv = $('<div>', {
+                id: constants.selector.filter_id,
+            });
+
+            chrome.storage.local.get([constants.storageKey], function (result) {
+                let tagSet = new Set();
+                let json = {};
+                if (result[constants.storageKey] !== void 0) {
+                    json = JSON.parse(result[constants.storageKey]);
+                }
+                for (let k in json) {
+                    let array = json[k];
+                    for (let tag of array) {
+                        if (!tagSet.has(tag)) {
+                            tagSet.add(tag);
+                        }
                     }
                 }
-            }
-            let tagArray = Array.from(tagSet);
-            tagArray.sort();
+                let tagArray = Array.from(tagSet);
+                tagArray.sort();
 
-            let $octotagList = $('<ul>', {
-                class: constants.functional.taglist_ul_class + ' ' + constants.functional.filtertaglist_ul_class,
+                let $octotagList = $('<ul>', {
+                    class: constants.functional.taglist_ul_class + ' ' + constants.functional.filtertaglist_ul_class,
+                });
+                tagArray.forEach(function (tag) {
+                    let $li = $('<li>');
+                    $li.append($('<input>', {
+                        type: 'checkbox',
+                        id: 'octotag-filter-' + tag,
+                        value: tag,
+                    })).append($('<label>', {
+                        for: 'octotag-filter-' + tag,
+                        text: tag,
+                    }));
+
+                    $octotagList.append($li);
+                });
+
+                $filterDiv.append($octotagList);
+
+                resolve();
             });
-            tagArray.forEach(function (tag) {
-                let $li = $('<li>');
-                $li.append($('<input>', {
-                    type: 'checkbox',
-                    id: 'octotag-filter-' + tag,
-                    value: tag,
-                })).append($('<label>', {
-                    for: 'octotag-filter-' + tag,
-                    text: tag,
-                }));
-
-                $octotagList.append($li);
-            });
-
-            $filterDiv.append($octotagList);
-
-            resolve();
+            $(constants.selector.github_filter_div).append(constants.DOM.filterbytags_heading).append($filterDiv);
         });
-        $(constants.selector.github_filter_div).append(constants.DOM.filterbytags_heading).append($filterDiv);
-    });
+    }
 
     /**
      * Add event listeners.
@@ -367,16 +355,13 @@ $(function () {
                 href: chrome.extension.getURL('css/style.css'),
             }));
 
-            Promise.all([appendRepoTags, appendTagFilter]).then(function () {
+            Promise.all([appendRepoTags(), appendTagFilter()]).then(function () {
                 resolve('stars');
             });
         } else {
             resolve('github');
         }
     });
-
-    //setupTestdata();
-    //deleteTestDate();
 
     main.then(function (value) {
         addListeners();
